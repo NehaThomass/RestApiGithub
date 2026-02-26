@@ -1,7 +1,3 @@
-"""
-Students blueprint – full CRUD for student records.
-All endpoints require JWT authentication.
-"""
 import os
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required
@@ -9,65 +5,68 @@ from app.models.student import Student
 from app.repositories.json_repository import JsonRepository
 from app.services.student_service import StudentService
 
-students_bp = Blueprint("students", __name__)
+employees_bp = Blueprint("employees", __name__)
 
 
 def _get_service() -> StudentService:
     data_dir = current_app.config["DATA_DIR"]
-    repo = JsonRepository[Student](os.path.join(data_dir, "students.json"), Student)
+    repo = JsonRepository[Student](
+        os.path.join(data_dir, "employees.json"),
+        Student
+    )
     return StudentService(repo)
 
 
-@students_bp.route("", methods=["GET"])
+@employees_bp.route("", methods=["GET"])
 @jwt_required()
-def list_students():
-    """List all students."""
-    students = _get_service().list_students()
-    return jsonify({"count": len(students), "students": students}), 200
+def list_employees():
+    employees = _get_service().list_students()
+    return jsonify({"count": len(employees), "employees": employees}), 200
 
 
-@students_bp.route("/<string:student_id>", methods=["GET"])
+@employees_bp.route("/<string:employee_id>", methods=["GET"])
 @jwt_required()
-def get_student(student_id: str):
-    """Get a single student by ID."""
-    student = _get_service().get_student(student_id)
-    if student is None:
-        return jsonify({"error": "Student not found"}), 404
-    return jsonify(student), 200
+def get_employee(employee_id: str):
+    employee = _get_service().get_student(employee_id)
+    if employee is None:
+        return jsonify({"error": "Employee not found"}), 404
+    return jsonify(employee), 200
 
 
-@students_bp.route("", methods=["POST"])
+@employees_bp.route("", methods=["POST"])
 @jwt_required()
-def create_student():
-    """Create a new student."""
+def create_employee():
     body = request.get_json(silent=True) or {}
+
     required_fields = ("first_name", "last_name", "email", "course")
     missing = [f for f in required_fields if not body.get(f, "").strip()]
+
     if missing:
         return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
 
     try:
-        student = _get_service().create_student(body)
-        return jsonify({"message": "Student created", "student": student}), 201
+        employee = _get_service().create_student(body)
+        return jsonify({"message": "Employee created", "employee": employee}), 201
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 409
 
 
-@students_bp.route("/<string:student_id>", methods=["PUT"])
+@employees_bp.route("/<string:employee_id>", methods=["PUT"])
 @jwt_required()
-def update_student(student_id: str):
-    """Update an existing student."""
+def update_employee(employee_id: str):
     body = request.get_json(silent=True) or {}
-    result = _get_service().update_student(student_id, body)
+    result = _get_service().update_student(employee_id, body)
+
     if result is None:
-        return jsonify({"error": "Student not found"}), 404
-    return jsonify({"message": "Student updated", "student": result}), 200
+        return jsonify({"error": "Employee not found"}), 404
+
+    return jsonify({"message": "Employee updated", "employee": result}), 200
 
 
-@students_bp.route("/<string:student_id>", methods=["DELETE"])
+@employees_bp.route("/<string:employee_id>", methods=["DELETE"])
 @jwt_required()
-def delete_student(student_id: str):
-    """Delete a student."""
-    if _get_service().delete_student(student_id):
-        return jsonify({"message": "Student deleted"}), 200
-    return jsonify({"error": "Student not found"}), 404
+def delete_employee(employee_id: str):
+    if _get_service().delete_student(employee_id):
+        return jsonify({"message": "Employee deleted"}), 200
+
+    return jsonify({"error": "Employee not found"}), 404
