@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 
-students_bp = Blueprint("students", _name_)
+students_bp = Blueprint("students", __name__)
 
 students = []
 current_id = 1
