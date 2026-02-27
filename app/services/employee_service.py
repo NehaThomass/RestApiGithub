@@ -9,7 +9,7 @@ from app.repositories.json_repository import JsonRepository
 
 
 class EmployeeService:
-    def _init_(self, repo: JsonRepository[Employee]) -> None:
+    def __init__(self, repo: JsonRepository[Employee]) -> None:
         self._repo = repo
 
     def list_employees(self) -> list[dict]:

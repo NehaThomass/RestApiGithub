@@ -3,7 +3,7 @@ from app.extensions import jwt
 from app.config import config_by_name
 
 def create_app(config_name: str = "development") -> Flask:
-    app = Flask(_name_)
+    app = Flask(__name__)
     app.config.from_object(config_by_name[config_name])
 
     jwt.init_app(app)
