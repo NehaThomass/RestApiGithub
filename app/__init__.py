@@ -1,30 +1,26 @@
-"""
-Flask REST API Application Factory.
-"""
+import os
 from flask import Flask
-from app.extensions import jwt
-from app.config import config_by_name
+from flask_jwt_extended import JWTManager
+from app.api.employees import employees_bp
 
+jwt = JWTManager()
 
-def create_app(config_name: str = "development") -> Flask:
-    """Application factory pattern."""
+def create_app(config_name=None):
     app = Flask(__name__)
-    app.config.from_object(config_by_name[config_name])
 
-    # Initialize extensions
+    # Basic Configuration
+    app.config["JWT_SECRET_KEY"] = "super-secret-key"
+    app.config["DATA_DIR"] = os.path.join(os.getcwd(), "data")
+
+    # Initialize JWT
     jwt.init_app(app)
 
-    # Register blueprints
-    from app.api.auth import auth_bp
-    from app.api.students import students_bp
-    from app.api.health import health_bp
+    # Register Blueprint
+    app.register_blueprint(employees_bp, url_prefix="/employees")
 
-    app.register_blueprint(health_bp, url_prefix="/api/v1")
-    app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
-    app.register_blueprint(students_bp, url_prefix="/api/v1/students")
-
-    # Register error handlers
-    from app.errors import register_error_handlers
-    register_error_handlers(app)
+    # Home route
+    @app.route("/")
+    def home():
+        return {"message": "Employee API is running"}
 
     return app
