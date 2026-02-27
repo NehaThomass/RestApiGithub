@@ -1,21 +1,26 @@
 from flask import Flask
 from app.extensions import jwt
+from app.config import config_by_name
 
-
-def create_app(config_name="default"):
-    app = Flask(__name__)   
-
-    from app.config import config_by_name
+def create_app(config_name: str = "development") -> Flask:
+    app = Flask(_name_)
     app.config.from_object(config_by_name[config_name])
 
     jwt.init_app(app)
 
     from app.api.auth import auth_bp
-    from app.api.employees import employees_bp
     from app.api.health import health_bp
+    from app.api.employees import students_bp   
 
-    app.register_blueprint(auth_bp, url_prefix="/api/auth")
-    app.register_blueprint(employees_bp, url_prefix="/api/students")
-    app.register_blueprint(health_bp, url_prefix="/api/health")
+    app.register_blueprint(health_bp, url_prefix="/api/v1")
+    app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
+    app.register_blueprint(students_bp, url_prefix="/api/v1/students")
+
+    from app.errors import register_error_handlers
+    register_error_handlers(app)
+
+    @app.route("/")
+    def home():
+        return {"message": "Employee REST API is running. Use /api/v1/... endpoints."}
 
     return app

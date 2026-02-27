@@ -1,21 +1,22 @@
-#employee details-23bcnb40
-[
-  {
-    "employeeID": "e1",
-    "firstName": "Bob",
-    "lastName": "Jones",
-    "gender": "Male",
-    "dateOfBirth": "1998-05-12",
-    "department": {
-      "departmentID": "d1",
-      "departmentName": "IT",
-      "location": "Bangalore"
-    },
-    "salary": {
-      "salaryID": "s1",
-      "basicSalary": 50000,
-      "bonus": 5000,
-      "allowances": 3000
+{
+  "employees": [
+    {
+      "EmployeeID": 1,
+      "FirstName": "John",
+      "LastName": "Doe",
+      "Gender": "Male",
+      "DateOfBirth": "1998-05-10",
+      "Department": {
+        "DepartmentID": 101,
+        "DepartmentName": "IT",
+        "Location": "Bangalore"
+      },
+      "Salary": {
+        "SalaryID": 1001,
+        "BasicSalary": 50000,
+        "Bonus": 5000,
+        "Allowances": 2000
+      }
     }
-  }
-]
+  ]
+}
