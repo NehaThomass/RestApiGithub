@@ -1,51 +1,27 @@
-"""
-Auth blueprint – register & login endpoints.
-"""
 import os
-from flask import Blueprint, request, jsonify, current_app
-from app.models.user import User
-from app.repositories.json_repository import JsonRepository
-from app.services.auth_service import AuthService
+from flask import Flask
+from flask_jwt_extended import JWTManager
 
-auth_bp = Blueprint("auth", __name__)
+jwt = JWTManager()
 
+def create_app(config_name=None):
+    app = Flask(__name__)
 
-def _get_service() -> AuthService:
-    data_dir = current_app.config["DATA_DIR"]
-    repo = JsonRepository[User](os.path.join(data_dir, "users.json"), User)
-    return AuthService(repo)
+    # Config
+    app.config["JWT_SECRET_KEY"] = "super-secret-key"
+    app.config["DATA_DIR"] = os.path.join(os.getcwd(), "data")
 
+    # Initialize JWT
+    jwt.init_app(app)
 
-@auth_bp.route("/register", methods=["POST"])
-def register():
-    """Register a new user."""
-    body = request.get_json(silent=True) or {}
-    username = body.get("username", "").strip()
-    password = body.get("password", "").strip()
-    role = body.get("role", "user").strip()
+    # Import blueprints INSIDE function
+    from app.api.auth import auth_bp
+    from app.api.students import students_bp
+    from app.api.health import health_bp
 
-    if not username or not password:
-        return jsonify({"error": "username and password are required"}), 400
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(students_bp, url_prefix="/api/students")
+    app.register_blueprint(health_bp)
 
-    try:
-        user = _get_service().register(username, password, role)
-        return jsonify({"message": "User registered successfully", "user": user}), 201
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 409
-
-
-@auth_bp.route("/login", methods=["POST"])
-def login():
-    """Authenticate user and return JWT tokens."""
-    body = request.get_json(silent=True) or {}
-    username = body.get("username", "").strip()
-    password = body.get("password", "").strip()
-
-    if not username or not password:
-        return jsonify({"error": "username and password are required"}), 400
-
-    result = _get_service().login(username, password)
-    if result is None:
-        return jsonify({"error": "Invalid username or password"}), 401
-
-    return jsonify(result), 200
+    return app

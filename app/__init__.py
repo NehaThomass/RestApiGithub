@@ -1,26 +1,26 @@
 import os
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from app.api.employees import employees_bp
 
 jwt = JWTManager()
 
 def create_app(config_name=None):
     app = Flask(__name__)
 
-    # Basic Configuration
+    # Configuration
     app.config["JWT_SECRET_KEY"] = "super-secret-key"
     app.config["DATA_DIR"] = os.path.join(os.getcwd(), "data")
 
-    # Initialize JWT
     jwt.init_app(app)
 
-    # Register Blueprint
-    app.register_blueprint(employees_bp, url_prefix="/employees")
+    # Import blueprints INSIDE function
+    from app.api.auth import auth_bp
+    from app.api.students import students_bp
+    from app.api.health import health_bp
 
-    # Home route
-    @app.route("/")
-    def home():
-        return {"message": "Employee API is running"}
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(students_bp, url_prefix="/api/students")
+    app.register_blueprint(health_bp)
 
     return app
