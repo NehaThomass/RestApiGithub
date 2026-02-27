@@ -6,17 +6,17 @@ from app.config import config_by_name
 def create_app(config_name: str = "development") -> Flask:
     app = Flask(__name__)
 
-    # Safe configuration loading
+    # Safe config loading
     config = config_by_name.get(config_name)
     if config is None:
         config = config_by_name["development"]
 
     app.config.from_object(config)
 
-    # Initialize extensions
+    # Initialize JWT
     jwt.init_app(app)
 
-    # Import blueprints
+    # Import blueprints (Correct naming)
     from app.api.auth import auth_bp
     from app.api.health import health_bp
     from app.api.employees import employees_bp
